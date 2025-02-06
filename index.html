@@ -7,7 +7,7 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
+            background-color: #f4f7fc;
             margin: 0;
             padding: 20px;
         }
@@ -15,70 +15,48 @@
             text-align: center;
             color: #333;
         }
-        #dashboard {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
         .card {
-            background-color: #fff;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
             padding: 20px;
-            margin: 10px;
-            width: 300px;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 4px 4px 15px rgba(0, 0, 0, 0.2);
+            margin: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            background-color: #fff;
         }
         .card h2 {
             margin-top: 0;
-            color: #007BFF;
+            font-size: 1.5em;
+            color: #2c3e50;
         }
         .card p {
-            margin: 10px 0;
+            font-size: 1em;
             color: #555;
         }
-        .status {
-            font-weight: bold;
-            padding: 5px;
-            border-radius: 4px;
-            text-align: center;
+        .card p strong {
+            color: #2c3e50;
         }
-        .status-em-base {
-            background-color: #d4edda;
-            color: #155724;
+        .status-base {
+            border-left: 5px solid green;
         }
-        .status-em-deslocamento {
-            background-color: #fff3cd;
-            color: #856404;
+        .status-deslocamento {
+            border-left: 5px solid yellow;
         }
-        .status-em-acao {
-            background-color: #f8d7da;
-            color: #721c24;
-        }
-        .loading {
-            text-align: center;
-            font-size: 18px;
-            color: #007BFF;
+        .status-acao {
+            border-left: 5px solid red;
         }
     </style>
 </head>
 <body>
     <h1>Equipes Ativas</h1>
-    <div id="dashboard">
-        <div class="loading">Carregando dados...</div>
-    </div>
+    <div id="dashboard"></div>
 
     <script>
         async function carregarDados() {
             const url = "https://script.google.com/macros/s/AKfycbxdJXn-LqRb7MfM8qyEOBO5qNdCKme5rYSWzNlU7139cCgEa7AzN__FB8BWGYi7JtaZ/exec";
             try {
                 const response = await fetch(url);
-                if (!response.ok) throw new Error("Erro ao carregar dados");
+                if (!response.ok) {
+                    throw new Error("Erro ao carregar dados");
+                }
                 const dados = await response.json();
                 const dashboard = document.getElementById("dashboard");
                 dashboard.innerHTML = "";
@@ -86,27 +64,45 @@
                 dados.forEach(equipe => {
                     const card = document.createElement("div");
                     card.className = "card";
+                    
+                    // Definir a classe do cartão com base no status
+                    let statusClass = '';
+                    switch (equipe.status) {
+                        case 'Em base':
+                            statusClass = 'status-base';
+                            break;
+                        case 'Em deslocamento':
+                            statusClass = 'status-deslocamento';
+                            break;
+                        case 'Em ação':
+                            statusClass = 'status-acao';
+                            break;
+                        default:
+                            statusClass = '';
+                            break;
+                    }
+
+                    card.classList.add(statusClass);
+                    
                     card.innerHTML = `
-                        <h2>${equipe.equipe}</h2>
-                        <p><strong>Chefe:</strong> ${equipe.chefe}</p>
-                        <p><strong>Auxiliares:</strong> ${equipe.auxiliar1}, ${equipe.auxiliar2}</p>
-                        <p><strong>Motorista:</strong> ${equipe.motorista}</p>
-                        <p><strong>Veículo:</strong> ${equipe.veiculo} (Placa: ${equipe.placa})</p>
-                        <p><strong>Bairro:</strong> ${equipe.bairro}</p>
-                        <div class="status status-${equipe.status.toLowerCase().replace(" ", "-")}">
-                            ${equipe.status}
-                        </div>
+                        <h2>${equipe.equipe || 'Equipe não disponível'}</h2>
+                        <p><strong>Chefe:</strong> ${equipe.chefe || 'Não informado'}</p>
+                        <p><strong>Auxiliares:</strong> ${equipe.auxiliar1 || 'Não informado'}, ${equipe.auxiliar2 || 'Não informado'}</p>
+                        <p><strong>Motorista:</strong> ${equipe.motorista || 'Não informado'}</p>
+                        <p><strong>Veículo:</strong> ${equipe.veiculo || 'Não informado'} (Placa: ${equipe.placa || 'Não disponível'})</p>
+                        <p><strong>Bairro:</strong> ${equipe.bairro || 'Não informado'}</p>
+                        <p><strong>Status:</strong> ${equipe.status || 'Não informado'}</p>
                     `;
                     dashboard.appendChild(card);
                 });
             } catch (error) {
+                console.error("Erro ao carregar os dados:", error);
                 const dashboard = document.getElementById("dashboard");
-                dashboard.innerHTML = `<div class="card">Erro ao carregar dados: ${error.message}</div>`;
+                dashboard.innerHTML = `<p>Erro ao carregar os dados. Tente novamente mais tarde.</p>`;
             }
         }
 
         carregarDados();
-        setInterval(carregarDados, 30000); // Atualiza a cada 30 segundos
     </script>
 </body>
 </html>
