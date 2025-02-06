@@ -51,59 +51,61 @@
 
     <script>
         async function carregarDados() {
-            const url = "https://script.google.com/macros/s/AKfycbxdJXn-LqRb7MfM8qyEOBO5qNdCKme5rYSWzNlU7139cCgEa7AzN__FB8BWGYi7JtaZ/exec";
-            try {
-                const response = await fetch(url);
-                if (!response.ok) {
-                    throw new Error("Erro ao carregar dados");
-                }
-                const dados = await response.json();
-                const dashboard = document.getElementById("dashboard");
-                dashboard.innerHTML = "";
-
-                dados.forEach(equipe => {
-                    const card = document.createElement("div");
-                    card.className = "card";
-                    
-                    // Definir a classe do cartão com base no status
-                    let statusClass = '';
-                    switch (equipe.status) {
-                        case 'Em base':
-                            statusClass = 'status-base';
-                            break;
-                        case 'Em deslocamento':
-                            statusClass = 'status-deslocamento';
-                            break;
-                        case 'Em ação':
-                            statusClass = 'status-acao';
-                            break;
-                        default:
-                            statusClass = '';
-                            break;
-                    }
-
-                    card.classList.add(statusClass);
-                    
-                    card.innerHTML = `
-                        <h2>${equipe.equipe || 'Equipe não disponível'}</h2>
-                        <p><strong>Chefe:</strong> ${equipe.chefe || 'Não informado'}</p>
-                        <p><strong>Auxiliares:</strong> ${equipe.auxiliar1 || 'Não informado'}, ${equipe.auxiliar2 || 'Não informado'}</p>
-                        <p><strong>Motorista:</strong> ${equipe.motorista || 'Não informado'}</p>
-                        <p><strong>Veículo:</strong> ${equipe.veiculo || 'Não informado'} (Placa: ${equipe.placa || 'Não disponível'})</p>
-                        <p><strong>Bairro:</strong> ${equipe.bairro || 'Não informado'}</p>
-                        <p><strong>Status:</strong> ${equipe.status || 'Não informado'}</p>
-                    `;
-                    dashboard.appendChild(card);
-                });
-            } catch (error) {
-                console.error("Erro ao carregar os dados:", error);
-                const dashboard = document.getElementById("dashboard");
-                dashboard.innerHTML = `<p>Erro ao carregar os dados. Tente novamente mais tarde.</p>`;
-            }
+    const url = "https://script.google.com/macros/s/AKfycbxdJXn-LqRb7MfM8qyEOBO5qNdCKme5rYSWzNlU7139cCgEa7AzN__FB8BWGYi7JtaZ/exec"; // URL do Apps Script
+    try {
+        const response = await fetch(url);
+        console.log(response);  // Adicionando um log para verificar a resposta
+        if (!response.ok) {
+            throw new Error("Erro ao carregar dados");
         }
+        const dados = await response.json();
+        console.log(dados); // Verifique o que está sendo retornado
+        const dashboard = document.getElementById("dashboard");
+        dashboard.innerHTML = "";
 
-        carregarDados();
-        setInterval(carregarDados, 10000); // Atualiza a cada 10 segundos
+        dados.forEach(equipe => {
+            const card = document.createElement("div");
+            card.className = "card";
+            
+            let statusClass = '';
+            switch (equipe.status) {
+                case 'Em base':
+                    statusClass = 'status-base';
+                    break;
+                case 'Em deslocamento':
+                    statusClass = 'status-deslocamento';
+                    break;
+                case 'Em ação':
+                    statusClass = 'status-acao';
+                    break;
+                default:
+                    statusClass = '';
+                    break;
+            }
+
+            card.classList.add(statusClass);
+            
+            card.innerHTML = `
+                <h2>${equipe.equipe || 'Equipe não disponível'}</h2>
+                <p><strong>Chefe:</strong> ${equipe.chefe || 'Não informado'}</p>
+                <p><strong>Auxiliares:</strong> ${equipe.auxiliar1 || 'Não informado'}, ${equipe.auxiliar2 || 'Não informado'}</p>
+                <p><strong>Motorista:</strong> ${equipe.motorista || 'Não informado'}</p>
+                <p><strong>Veículo:</strong> ${equipe.veiculo || 'Não informado'} (Placa: ${equipe.placa || 'Não disponível'})</p>
+                <p><strong>Bairro:</strong> ${equipe.bairro || 'Não informado'}</p>
+                <p><strong>Status:</strong> ${equipe.status || 'Não informado'}</p>
+            `;
+            dashboard.appendChild(card);
+        });
+    } catch (error) {
+        console.error("Erro ao carregar os dados:", error);
+        const dashboard = document.getElementById("dashboard");
+        dashboard.innerHTML = `<p>Erro ao carregar os dados. Tente novamente mais tarde.</p>`;
+    }
+}
+
+carregarDados();
+
+setInterval(carregarDados, 10000); // Atualiza a cada 10 segundos
 
     </script>
 </body>
