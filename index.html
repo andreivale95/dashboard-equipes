@@ -61,4 +61,34 @@
     </style>
 </head>
 <body>
-    <h1>Equipes A
+    <h1>Equipes Ativas</h1>
+    <div id="dashboard"></div>
+
+    <script>
+        async function carregarDados() {
+            const url = "https://script.google.com/macros/s/AKfycbxdJXn-LqRb7MfM8qyEOBO5qNdCKme5rYSWzNlU7139cCgEa7AzN__FB8BWGYi7JtaZ/exec";
+            const response = await fetch(url);
+            const dados = await response.json();
+            const dashboard = document.getElementById("dashboard");
+            dashboard.innerHTML = "";
+
+            dados.forEach(equipe => {
+                const card = document.createElement("div");
+                card.className = "card";
+                card.innerHTML = `
+                    <h2>${equipe.equipe}</h2>
+                    <p><strong>Chefe:</strong> ${equipe.chefe}</p>
+                    <p><strong>Auxiliares:</strong> ${equipe.auxiliar1}, ${equipe.auxiliar2}</p>
+                    <p><strong>Motorista:</strong> ${equipe.motorista}</p>
+                    <p><strong>Veículo:</strong> ${equipe.veiculo} (Placa: ${equipe.placa})</p>
+                    <p><strong>Bairro:</strong> ${equipe.bairro}</p>
+                `;
+                dashboard.appendChild(card);
+            });
+        }
+
+        carregarDados();
+        setInterval(carregarDados, 30000); // Atualiza a cada 30 segundos
+    </script>
+</body>
+</html>
