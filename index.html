@@ -78,10 +78,17 @@
                 const response = await fetch(url);
                 if (!response.ok) throw new Error("Erro ao carregar dados");
                 const dados = await response.json();
+                console.log(dados); // Inspecione os dados no console
                 const dashboard = document.getElementById("dashboard");
                 dashboard.innerHTML = "";
 
                 dados.forEach(equipe => {
+                    // Verifique se o campo "status" existe e é uma string
+                    if (!equipe.status || typeof equipe.status !== "string") {
+                        console.warn("Equipe com status inválido:", equipe);
+                        return; // Ignora esta equipe
+                    }
+
                     const card = document.createElement("div");
                     card.className = `card card-${equipe.status.toLowerCase().replace(" ", "-")}`;
                     card.innerHTML = `
@@ -97,12 +104,19 @@
                 });
             } catch (error) {
                 const dashboard = document.getElementById("dashboard");
-                dashboard.innerHTML = `<div class="card">Erro ao carregar dados: ${error.message}</div>`;
+                dashboard.innerHTML = `
+                    <div class="card">
+                        <h2>Erro ao carregar dados</h2>
+                        <p><strong>Mensagem:</strong> ${error.message}</p>
+                        <p><strong>Detalhes:</strong> Verifique o console para mais informações.</p>
+                    </div>
+                `;
+                console.error("Erro detalhado:", error);
             }
         }
 
         carregarDados();
-        setInterval(carregarDados, 30000); // Atualiza a cada 30 segundos
+        setInterval(carregarDados, 10000); // Atualiza a cada 10 segundos
     </script>
 </body>
 </html>
