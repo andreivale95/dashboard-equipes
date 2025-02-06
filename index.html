@@ -1,38 +1,142 @@
-function carregarDados() {
-  const url = "https://script.google.com/macros/s/AKfycbxdJXn-LqRb7MfM8qyEOBO5qNdCKme5rYSWzNlU7139cCgEa7AzN__FB8BWGYi7JtaZ/exec?callback=processarDados";
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard de Equipes</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        #dashboard {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .card {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin: 10px;
+            width: 300px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 4px 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        .card h2 {
+            margin-top: 0;
+            color: #007BFF;
+        }
+        .card p {
+            margin: 10px 0;
+            color: #555;
+        }
+        .status {
+            font-weight: bold;
+            padding: 5px;
+            border-radius: 4px;
+            text-align: center;
+        }
+        /* Faixa de cor do status */
+        .card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            width: 10px; /* Largura da faixa de cor */
+            background-color: #6c757d; /* Cor padrão (cinza) */
+            background: linear-gradient(to bottom, rgba(255, 255, 255, 0.2), transparent);
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+        }
+        /* Cores para cada status */
+        .card-em-base::before {
+            background-color: #28a745; /* Verde */
+        }
+        .card-em-deslocamento::before {
+            background-color: #ffc107; /* Amarelo */
+        }
+        .card-em-acao::before {
+            background-color: #dc3545; /* Vermelho */
+        }
+        .card-status-desconhecido::before {
+            background-color: #6c757d; /* Cinza */
+        }
+        .loading {
+            text-align: center;
+            font-size: 18px;
+            color: #007BFF;
+        }
+    </style>
+</head>
+<body>
+    <h1>Equipes Ativas</h1>
+    <div id="dashboard">
+        <div class="loading">Carregando dados...</div>
+    </div>
 
-  // Cria um script dinâmico para fazer a requisição JSONP
-  const script = document.createElement("script");
-  script.src = url;
-  document.body.appendChild(script);
-}
+    <script>
+        async function carregarDados() {
+            const url = "https://script.google.com/macros/s/AKfycbxdJXn-LqRb7MfM8qyEOBO5qNdCKme5rYSWzNlU7139cCgEa7AzN__FB8BWGYi7JtaZ/exec"; // URL do seu Apps Script
+            try {
+                const response = await fetch(url);
+                if (!response.ok) throw new Error("Erro ao carregar dados");
+                const dados = await response.json();
+                console.log(dados); // Inspecione os dados no console
+                const dashboard = document.getElementById("dashboard");
+                dashboard.innerHTML = "";
 
-function processarDados(dados) {
-  const dashboard = document.getElementById("dashboard");
-  dashboard.innerHTML = "";
+                dados.forEach(equipe => {
+                    // Verifique se o campo "status" existe e é uma string válida
+                    let status = equipe.status || "Status desconhecido"; // Valor padrão se status for inválido
+                    if (typeof status !== "string") {
+                        status = "Status desconhecido"; // Força o valor padrão se não for uma string
+                    }
 
-  dados.forEach(equipe => {
-    let status = equipe.status || "Status desconhecido";
-    if (typeof status !== "string") {
-      status = "Status desconhecido";
-    }
+                    // Normaliza o status para usar no nome da classe CSS
+                    const statusClass = status.toLowerCase().replace(" ", "-");
 
-    const statusClass = status.toLowerCase().replace(" ", "-");
+                    const card = document.createElement("div");
+                    card.className = `card card-${statusClass}`;
+                    card.innerHTML = `
+                        <h2>${equipe.equipe}</h2>
+                        <p><strong>Chefe:</strong> ${equipe.chefe}</p>
+                        <p><strong>Auxiliares:</strong> ${equipe.auxiliar1}, ${equipe.auxiliar2}</p>
+                        <p><strong>Motorista:</strong> ${equipe.motorista}</p>
+                        <p><strong>Veículo:</strong> ${equipe.veiculo} (Placa: ${equipe.placa})</p>
+                        <p><strong>Bairro:</strong> ${equipe.bairro}</p>
+                        <div class="status">Status: ${status}</div>
+                    `;
+                    dashboard.appendChild(card);
+                });
+            } catch (error) {
+                const dashboard = document.getElementById("dashboard");
+                dashboard.innerHTML = `
+                    <div class="card">
+                        <h2>Erro ao carregar dados</h2>
+                        <p><strong>Mensagem:</strong> ${error.message}</p>
+                        <p><strong>Detalhes:</strong> Verifique o console para mais informações.</p>
+                    </div>
+                `;
+                console.error("Erro detalhado:", error);
+            }
+        }
 
-    const card = document.createElement("div");
-    card.className = `card card-${statusClass}`;
-    card.innerHTML = `
-      <h2>${equipe.equipe}</h2>
-      <p><strong>Chefe:</strong> ${equipe.chefe}</p>
-      <p><strong>Auxiliares:</strong> ${equipe.auxiliar1}, ${equipe.auxiliar2}</p>
-      <p><strong>Motorista:</strong> ${equipe.motorista}</p>
-      <p><strong>Veículo:</strong> ${equipe.veiculo} (Placa: ${equipe.placa})</p>
-      <p><strong>Bairro:</strong> ${equipe.bairro}</p>
-      <div class="status">Status: ${status}</div>
-    `;
-    dashboard.appendChild(card);
-  });
-}
-
-carregarDados();
-setInterval(carregarDados, 10000); // Atualiza a cada 10 segundos
+        carregarDados();
+        setInterval(carregarDados, 10000); // Atualiza a cada 10 segundos
+    </script>
+</body>
+</html>
