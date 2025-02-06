@@ -1,28 +1,38 @@
-function doGet(request) {
-  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Equipes");
-  if (!sheet) {
-    throw new Error("A aba 'Equipes' não foi encontrada.");
-  }
+function carregarDados() {
+  const url = "https://script.google.com/macros/s/AKfycbxdJXn-LqRb7MfM8qyEOBO5qNdCKme5rYSWzNlU7139cCgEa7AzN__FB8BWGYi7JtaZ/exec?callback=processarDados";
 
-  const data = sheet.getDataRange().getValues();
-  const headers = data[0]; // Primeira linha é o cabeçalho
-  const equipes = [];
-
-  // Converte os dados da planilha em um array de objetos
-  for (let i = 1; i < data.length; i++) {
-    const equipe = {};
-    for (let j = 0; j < headers.length; j++) {
-      const chave = headers[j].toLowerCase().replace(/ /g, "_");
-      equipe[chave] = data[i][j];
-    }
-    equipes.push(equipe);
-  }
-
-  // Retorna os dados em formato JSONP
-  const callback = request.parameter.callback;
-  if (callback) {
-    return ContentService.createTextOutput(`${callback}(${JSON.stringify(equipes)})`).setMimeType(ContentService.MimeType.JAVASCRIPT);
-  } else {
-    return ContentService.createTextOutput(JSON.stringify(equipes)).setMimeType(ContentService.MimeType.JSON);
-  }
+  // Cria um script dinâmico para fazer a requisição JSONP
+  const script = document.createElement("script");
+  script.src = url;
+  document.body.appendChild(script);
 }
+
+function processarDados(dados) {
+  const dashboard = document.getElementById("dashboard");
+  dashboard.innerHTML = "";
+
+  dados.forEach(equipe => {
+    let status = equipe.status || "Status desconhecido";
+    if (typeof status !== "string") {
+      status = "Status desconhecido";
+    }
+
+    const statusClass = status.toLowerCase().replace(" ", "-");
+
+    const card = document.createElement("div");
+    card.className = `card card-${statusClass}`;
+    card.innerHTML = `
+      <h2>${equipe.equipe}</h2>
+      <p><strong>Chefe:</strong> ${equipe.chefe}</p>
+      <p><strong>Auxiliares:</strong> ${equipe.auxiliar1}, ${equipe.auxiliar2}</p>
+      <p><strong>Motorista:</strong> ${equipe.motorista}</p>
+      <p><strong>Veículo:</strong> ${equipe.veiculo} (Placa: ${equipe.placa})</p>
+      <p><strong>Bairro:</strong> ${equipe.bairro}</p>
+      <div class="status">Status: ${status}</div>
+    `;
+    dashboard.appendChild(card);
+  });
+}
+
+carregarDados();
+setInterval(carregarDados, 10000); // Atualiza a cada 10 segundos
