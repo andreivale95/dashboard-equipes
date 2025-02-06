@@ -48,15 +48,17 @@
             border-radius: 4px;
             text-align: center;
         }
-        /* Cores para cada status */
-        .card-em-base {
-            border-left: 5px solid #28a745; /* Verde */
+        .status-em-base {
+            background-color: #d4edda;
+            color: #155724;
         }
-        .card-em-deslocamento {
-            border-left: 5px solid #ffc107; /* Amarelo */
+        .status-em-deslocamento {
+            background-color: #fff3cd;
+            color: #856404;
         }
-        .card-em-acao {
-            border-left: 5px solid #dc3545; /* Vermelho */
+        .status-em-acao {
+            background-color: #f8d7da;
+            color: #721c24;
         }
         .loading {
             text-align: center;
@@ -78,19 +80,12 @@
                 const response = await fetch(url);
                 if (!response.ok) throw new Error("Erro ao carregar dados");
                 const dados = await response.json();
-                console.log(dados); // Inspecione os dados no console
                 const dashboard = document.getElementById("dashboard");
                 dashboard.innerHTML = "";
 
                 dados.forEach(equipe => {
-                    // Verifique se o campo "status" existe e é uma string
-                    if (!equipe.status || typeof equipe.status !== "string") {
-                        console.warn("Equipe com status inválido:", equipe);
-                        return; // Ignora esta equipe
-                    }
-
                     const card = document.createElement("div");
-                    card.className = `card card-${equipe.status.toLowerCase().replace(" ", "-")}`;
+                    card.className = "card";
                     card.innerHTML = `
                         <h2>${equipe.equipe}</h2>
                         <p><strong>Chefe:</strong> ${equipe.chefe}</p>
@@ -98,25 +93,20 @@
                         <p><strong>Motorista:</strong> ${equipe.motorista}</p>
                         <p><strong>Veículo:</strong> ${equipe.veiculo} (Placa: ${equipe.placa})</p>
                         <p><strong>Bairro:</strong> ${equipe.bairro}</p>
-                        <div class="status">Status: ${equipe.status}</div>
+                        <div class="status status-${equipe.status.toLowerCase().replace(" ", "-")}">
+                            ${equipe.status}
+                        </div>
                     `;
                     dashboard.appendChild(card);
                 });
             } catch (error) {
                 const dashboard = document.getElementById("dashboard");
-                dashboard.innerHTML = `
-                    <div class="card">
-                        <h2>Erro ao carregar dados</h2>
-                        <p><strong>Mensagem:</strong> ${error.message}</p>
-                        <p><strong>Detalhes:</strong> Verifique o console para mais informações.</p>
-                    </div>
-                `;
-                console.error("Erro detalhado:", error);
+                dashboard.innerHTML = `<div class="card">Erro ao carregar dados: ${error.message}</div>`;
             }
         }
 
         carregarDados();
-        setInterval(carregarDados, 10000); // Atualiza a cada 10 segundos
+        setInterval(carregarDados, 30000); // Atualiza a cada 30 segundos
     </script>
 </body>
 </html>
