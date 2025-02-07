@@ -119,13 +119,13 @@ async function carregarDados() {
             const card = document.createElement("div");
             card.className = "card";
 
-            let cardContent = <h2>${equipe.equipe}</h2>;
+            let cardContent = `<h2>${equipe.equipe}</h2>`;
             for (const chave in equipe) {
                 if (chave !== "equipe" && chave !== "status") {
-                    cardContent += <p><strong>${formatarChave(chave)}:</strong> ${equipe[chave]}</p>;
+                    cardContent += `<p><strong>${formatarChave(chave)}:</strong> ${equipe[chave]}</p>`;
                 }
             }
-            cardContent += <div class="status"><strong>Status:</strong> ${equipe.status || "Desconhecido"}</div>;
+            cardContent += `<div class="status"><strong>Status:</strong> ${equipe.status || "Desconhecido"}</div>`;
 
             card.innerHTML = cardContent;
             document.getElementById(statusId).appendChild(card);
