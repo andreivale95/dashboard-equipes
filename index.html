@@ -38,44 +38,67 @@
             justify-content: center;
         }
         .card {
-            background-color: #fff;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
-            padding: 20px;
-            margin: 10px;
-            width: 300px;
-            transition: transform 0.2s, box-shadow 0.2s;
-            position: relative;
-            border-left: 5px solid transparent; /* Define um espaço para a borda colorida */
-            padding-left: 15px; /* Dá um respiro para não ficar muito colado */
-        }
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 4px 4px 15px rgba(0, 0, 0, 0.2);
-        }
-        .card h2 {
-            margin-top: 0;
-            color: #007BFF;
-        }
-        .card p {
-            margin: 10px 0;
-            color: #555;
-        }
-        .status {
-            font-weight: bold;
-            padding: 5px;
-            border-radius: 4px;
-            text-align: center;
-        }
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    margin: 10px;
+    width: 300px;
+    transition: transform 0.2s, box-shadow 0.2s;
+    position: relative;
+    border-left: 5px solid transparent;
+    padding-left: 15px;
+}
 
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 4px 4px 15px rgba(0, 0, 0, 0.2);
+}
 
+.card h2 {
+    margin-top: 0;
+    color: #007BFF;
+}
 
-/* Cores específicas para cada status */
-.status-em-base .card { border-left-color: #28a745; } /* Verde */
-.status-em-deslocamento .card { border-left-color: #ffc107; } /* Amarelo */
-.status-em-acao .card { border-left-color: #dc3545; } /* Vermelho */
-.status-outros .card { border-left-color: #6c757d; } /* Cinza */
+.card p {
+    margin: 10px 0;
+    color: #555;
+}
+
+.status {
+    font-weight: bold;
+    padding: 5px;
+    border-radius: 4px;
+    text-align: center;
+}
+
+/* Ocultar detalhes por padrão */
+.card .detalhes {
+    display: none;
+}
+
+/* Botão de expandir/recolher */
+.toggle-btn {
+    background: none;
+    border: none;
+    color: #007BFF;
+    font-weight: bold;
+    cursor: pointer;
+    text-decoration: underline;
+    margin-top: 10px;
+}
+
+.toggle-btn:hover {
+    color: #0056b3;
+}
+
+/* Cores da borda lateral */
+.status-em-base .card { border-left-color: #28a745; }
+.status-em-deslocamento .card { border-left-color: #ffc107; }
+.status-em-acao .card { border-left-color: #dc3545; }
+.status-outros .card { border-left-color: #6c757d; }
+
 
     </style>
 </head>
@@ -110,9 +133,8 @@ async function carregarDados() {
         const response = await fetch(url);
         if (!response.ok) throw new Error("Erro ao carregar dados");
         const dados = await response.json();
-        console.log(dados); // Inspecione os dados no console
+        console.log(dados);
 
-        // Limpar as seções antes de adicionar novos elementos
         document.getElementById("em-base").innerHTML = "";
         document.getElementById("em-deslocamento").innerHTML = "";
         document.getElementById("em-acao").innerHTML = "";
@@ -130,14 +152,26 @@ async function carregarDados() {
             const card = document.createElement("div");
             card.className = "card";
 
-            let cardContent = `<h2>${equipe.equipe}</h2>`;
+            // Campos sempre visíveis
+            let cardContent = `
+                <h2>${equipe.equipe}</h2>
+                <p><strong>Chefe:</strong> ${equipe.chefe || "N/A"}</p>
+                <p><strong>Motorista:</strong> ${equipe.motorista || "N/A"}</p>
+                <p><strong>Telefone:</strong> ${equipe.telefone_motorista || "N/A"}</p>
+                <p><strong>Bairro:</strong> ${equipe.bairro || "N/A"}</p>
+                <p><strong>Pessoas na Equipe:</strong> ${equipe.pessoas_por_equipe || "N/A"}</p>
+                <button class="toggle-btn" onclick="toggleDetalhes(this)">Ver mais</button>
+                <div class="detalhes">
+            `;
+
+            // Adiciona os outros detalhes ao card (exceto os que já estão visíveis)
             for (const chave in equipe) {
-                if (chave !== "equipe" && chave !== "status") {
+                if (!["equipe", "status", "chefe", "motorista", "telefone_motorista", "bairro", "pessoas_por_equipe"].includes(chave)) {
                     cardContent += `<p><strong>${formatarChave(chave)}:</strong> ${equipe[chave]}</p>`;
                 }
             }
-            cardContent += `<div class="status"><strong>Status:</strong> ${equipe.status || "Desconhecido"}</div>`;
 
+            cardContent += `</div><div class="status"><strong>Status:</strong> ${equipe.status || "Desconhecido"}</div>`;
             card.innerHTML = cardContent;
             document.getElementById(statusId).appendChild(card);
         });
@@ -147,13 +181,25 @@ async function carregarDados() {
     }
 }
 
-// Função para formatar as chaves (ex: "auxiliar_1" → "Auxiliar 1")
+// Função para alternar a exibição dos detalhes
+function toggleDetalhes(botao) {
+    let detalhes = botao.nextElementSibling;
+    if (detalhes.style.display === "none" || detalhes.style.display === "") {
+        detalhes.style.display = "block";
+        botao.textContent = "Ver menos";
+    } else {
+        detalhes.style.display = "none";
+        botao.textContent = "Ver mais";
+    }
+}
+
+// Formata as chaves para exibição
 function formatarChave(chave) {
     return chave.replace(/_/g, " ").replace(/\b\w/g, letra => letra.toUpperCase());
 }
 
 carregarDados();
-setInterval(carregarDados, 10000); // Atualiza a cada 10 segundos
+setInterval(carregarDados, 10000);
     </script>
 </body>
 </html>
