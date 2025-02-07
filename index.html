@@ -66,28 +66,6 @@
             border-radius: 4px;
             text-align: center;
         }
-
-        .card-content {
-            display: block;
-        }
-
-        .hidden {
-            display: none;
-        }
-
-        .collapse-btn {
-            margin-top: 10px;
-            padding: 5px 10px;
-            background-color: #007BFF;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-
-        .collapse-btn:hover {
-            background-color: #0056b3;
-        }
     </style>
 </head>
 <body>
@@ -121,7 +99,7 @@ async function carregarDados() {
         const response = await fetch(url);
         if (!response.ok) throw new Error("Erro ao carregar dados");
         const dados = await response.json();
-        console.log(dados);
+        console.log(dados); // Inspecione os dados no console
 
         // Limpar as seções antes de adicionar novos elementos
         document.getElementById("em-base").innerHTML = "";
@@ -141,31 +119,13 @@ async function carregarDados() {
             const card = document.createElement("div");
             card.className = "card";
 
-            let cardContent = `<h2>${equipe.equipe}</h2>`;
-
-            // Botão de colapsar
-            cardContent += `<button class="collapse-btn" onclick="toggleContent('${equipe.equipe}')">Mostrar/Esconder Detalhes</button>`;
-
-            // Conteúdo que fica visível inicialmente (apenas as colunas selecionadas)
-            cardContent += `<div id="content-${equipe.equipe}" class="card-content">`;
-       
-            cardContent += `<p><strong>Chefe:</strong> ${equipe.chefe_de_equipe || "Não especificado"}</p>`;
-            cardContent += `<p><strong>Motorista:</strong> ${equipe.motorista || "Não especificado"}</p>`;
-            cardContent += `<p><strong>Bairro:</strong> ${equipe.bairro || "Não especificado"}</p>`;
-            cardContent += `<p><strong>Tel. Mot.:</strong> ${equipe.telefone_motorista || "Não especificado"}</p>`;
-
-            // Conteúdo oculto, que será mostrado quando o card for expandido
-            cardContent += `<div class="hidden">`;
+            let cardContent = <h2>${equipe.equipe}</h2>;
             for (const chave in equipe) {
-                if (chave !== "equipe" && chave !== "status" && chave !== "chefe_de_equipe" && chave !== "motorista" && chave !== "bairro" && chave !== "telefone_motorista") {
-                    cardContent += `<p><strong>${formatarChave(chave)}:</strong> ${equipe[chave]}</p>`;
+                if (chave !== "equipe" && chave !== "status") {
+                    cardContent += <p><strong>${formatarChave(chave)}:</strong> ${equipe[chave]}</p>;
                 }
             }
-            cardContent += `</div>`;
-            cardContent += `</div>`; // Fim do conteúdo
-
-            // Status do card
-            cardContent += `<div class="status"><strong>Status:</strong> ${equipe.status || "Desconhecido"}</div>`;
+            cardContent += <div class="status"><strong>Status:</strong> ${equipe.status || "Desconhecido"}</div>;
 
             card.innerHTML = cardContent;
             document.getElementById(statusId).appendChild(card);
@@ -179,12 +139,6 @@ async function carregarDados() {
 // Função para formatar as chaves (ex: "auxiliar_1" → "Auxiliar 1")
 function formatarChave(chave) {
     return chave.replace(/_/g, " ").replace(/\b\w/g, letra => letra.toUpperCase());
-}
-
-// Função para alternar a visibilidade do conteúdo
-function toggleContent(equipeNome) {
-    const content = document.getElementById(`content-${equipeNome}`);
-    content.querySelector('.hidden').classList.toggle("hidden"); // Alterna entre mostrar e esconder
 }
 
 carregarDados();
