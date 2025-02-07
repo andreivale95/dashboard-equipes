@@ -1,5 +1,94 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard de Equipes</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        #dashboard {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .card {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin: 10px;
+            width: 300px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 4px 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        .card h2 {
+            margin-top: 0;
+            color: #007BFF;
+        }
+        .card p {
+            margin: 10px 0;
+            color: #555;
+        }
+        .status {
+            font-weight: bold;
+            padding: 5px;
+            border-radius: 4px;
+            text-align: center;
+        }
+        /* Faixa de cor na parte inferior */
+        .card::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 10px; /* Altura da faixa de cor */
+            background-color: #6c757d; /* Cor padrão (cinza) */
+        }
+        /* Cores para cada status */
+        .card-em-base::after {
+            background-color: #28a745; /* Verde */
+        }
+        .card-em-deslocamento::after {
+            background-color: #ffc107; /* Amarelo */
+        }
+        .card-em-acao::after {
+            background-color: #dc3545; /* Vermelho */
+        }
+        .card-status-desconhecido::after {
+            background-color: #6c757d; /* Cinza */
+        }
+        .loading {
+            text-align: center;
+            font-size: 18px;
+            color: #007BFF;
+        }
+    </style>
+</head>
+<body>
+    <h1>Equipes Ativas</h1>
+    <div id="dashboard">
+        <div class="loading">Carregando dados...</div>
+    </div>
+
+    <script>
 async function carregarDados() {
-  const url = "https://script.google.com/macros/s/AKfycbzAqJ0uEAshdKoTRaw3N2rcyic13yHISCCM7m0OajH2SMwN76N33-RuOxTG5hj7yfdd/exec";
+  const url = "https://script.google.com/macros/s/AKfycbxdJXn-LqRb7MfM8qyEOBO5qNdCKme5rYSWzNlU7139cCgEa7AzN__FB8BWGYi7JtaZ/exec";
   try {
     const response = await fetch(url);
     if (!response.ok) throw new Error("Erro ao carregar dados");
@@ -59,3 +148,6 @@ function formatarChave(chave) {
 
 carregarDados();
 setInterval(carregarDados, 10000); // Atualiza a cada 10 segundos
+    </script>
+</body>
+</html>
