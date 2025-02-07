@@ -66,6 +66,28 @@
             border-radius: 4px;
             text-align: center;
         }
+
+        .card-content {
+            display: block; /* Inicialmente o conteúdo é visível */
+        }
+
+        .hidden {
+            display: none; /* Esconde o conteúdo ao aplicar a classe "hidden" */
+        }
+
+        .collapse-btn {
+            margin-top: 10px;
+            padding: 5px 10px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .collapse-btn:hover {
+            background-color: #0056b3;
+        }
     </style>
 </head>
 <body>
@@ -120,12 +142,29 @@ async function carregarDados() {
             card.className = "card";
 
             let cardContent = `<h2>${equipe.equipe}</h2>`;
+
+            // Adicionando um botão de colapsar
+            cardContent += `<button class="collapse-btn" onclick="toggleContent('${equipe.equipe}')">Mostrar/Esconder Detalhes</button>`;
+
+            // Conteúdo da equipe com visibilidade controlada
+            cardContent += `<div id="content-${equipe.equipe}" class="card-content">`;
+
+            // Mostrar apenas equipe, chefe de equipe e motorista inicialmente
+            cardContent += `<p><strong>Equipe:</strong> ${equipe.equipe}</p>`;
+            cardContent += `<p><strong>Chefe de Equipe:</strong> ${equipe.chefe_de_equipe || "Não especificado"}</p>`;
+            cardContent += `<p><strong>Motorista:</strong> ${equipe.motorista || "Não especificado"}</p>`;
+
+            // Mostrar os detalhes completos (visíveis ao expandir)
+            cardContent += `<div class="hidden">`;
             for (const chave in equipe) {
-                if (chave !== "equipe" && chave !== "status") {
+                if (chave !== "equipe" && chave !== "status" && chave !== "chefe_de_equipe" && chave !== "motorista") {
                     cardContent += `<p><strong>${formatarChave(chave)}:</strong> ${equipe[chave]}</p>`;
                 }
             }
+            cardContent += `</div>`;
+
             cardContent += `<div class="status"><strong>Status:</strong> ${equipe.status || "Desconhecido"}</div>`;
+            cardContent += `</div>`; // Fim do conteúdo
 
             card.innerHTML = cardContent;
             document.getElementById(statusId).appendChild(card);
@@ -139,6 +178,12 @@ async function carregarDados() {
 // Função para formatar as chaves (ex: "auxiliar_1" → "Auxiliar 1")
 function formatarChave(chave) {
     return chave.replace(/_/g, " ").replace(/\b\w/g, letra => letra.toUpperCase());
+}
+
+// Função para alternar a visibilidade do conteúdo
+function toggleContent(equipeNome) {
+    const content = document.getElementById(`content-${equipeNome}`);
+    content.querySelector('.hidden').classList.toggle("hidden"); // Alterna entre mostrar e esconder
 }
 
 carregarDados();
