@@ -47,6 +47,8 @@
             width: 300px;
             transition: transform 0.2s, box-shadow 0.2s;
             position: relative;
+            border-left: 5px solid transparent; /* Define um espaço para a borda colorida */
+            padding-left: 15px; /* Dá um respiro para não ficar muito colado */
         }
         .card:hover {
             transform: translateY(-5px);
@@ -66,6 +68,15 @@
             border-radius: 4px;
             text-align: center;
         }
+
+
+
+/* Cores específicas para cada status */
+.status-em-base .card { border-left-color: #28a745; } /* Verde */
+.status-em-deslocamento .card { border-left-color: #ffc107; } /* Amarelo */
+.status-em-acao .card { border-left-color: #dc3545; } /* Vermelho */
+.status-outros .card { border-left-color: #6c757d; } /* Cinza */
+
     </style>
 </head>
 <body>
