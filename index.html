@@ -149,15 +149,17 @@ async function carregarDados() {
             // Conteúdo da equipe com visibilidade controlada
             cardContent += `<div id="content-${equipe.equipe}" class="card-content">`;
 
-            // Mostrar apenas equipe, chefe de equipe e motorista inicialmente
+            // Mostrar apenas equipe, chefe de equipe, motorista, telefone e bairro inicialmente
             cardContent += `<p><strong>Equipe:</strong> ${equipe.equipe}</p>`;
             cardContent += `<p><strong>Chefe de Equipe:</strong> ${equipe.chefe_de_equipe || "Não especificado"}</p>`;
             cardContent += `<p><strong>Motorista:</strong> ${equipe.motorista || "Não especificado"}</p>`;
+            cardContent += `<p><strong>Tel. Mot.:</strong> ${equipe.telefone_motorista || "Não especificado"}</p>`;
+            cardContent += `<p><strong>Bairro:</strong> ${equipe.bairro || "Não especificado"}</p>`;
 
             // Mostrar os detalhes completos (visíveis ao expandir)
             cardContent += `<div class="hidden">`;
             for (const chave in equipe) {
-                if (chave !== "equipe" && chave !== "status" && chave !== "chefe_de_equipe" && chave !== "motorista") {
+                if (chave !== "equipe" && chave !== "status" && chave !== "chefe_de_equipe" && chave !== "motorista" && chave !== "telefone_motorista" && chave !== "bairro") {
                     cardContent += `<p><strong>${formatarChave(chave)}:</strong> ${equipe[chave]}</p>`;
                 }
             }
