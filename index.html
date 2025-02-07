@@ -15,7 +15,24 @@
             text-align: center;
             color: #333;
         }
-        #dashboard {
+        .status-section {
+            margin-bottom: 20px;
+        }
+        .status-title {
+            font-size: 20px;
+            font-weight: bold;
+            padding: 10px;
+            background: #ddd;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        .status-em-base { background: #28a745; color: white; }
+        .status-em-deslocamento { background: #ffc107; color: black; }
+        .status-em-acao { background: #dc3545; color: white; }
+        .status-outros { background: #6c757d; color: white; }
+
+        .cards-container {
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
@@ -30,7 +47,6 @@
             width: 300px;
             transition: transform 0.2s, box-shadow 0.2s;
             position: relative;
-            overflow: hidden;
         }
         .card:hover {
             transform: translateY(-5px);
@@ -50,100 +66,79 @@
             border-radius: 4px;
             text-align: center;
         }
-        /* Faixa de cor na parte inferior */
-        .card::after {
-            content: "";
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 10px; /* Altura da faixa de cor */
-            background-color: #6c757d; /* Cor padrão (cinza) */
-        }
-        /* Cores para cada status */
-        .card-em-base::after {
-            background-color: #28a745; /* Verde */
-        }
-        .card-em-deslocamento::after {
-            background-color: #ffc107; /* Amarelo */
-        }
-        .card-em-acao::after {
-            background-color: #dc3545; /* Vermelho */
-        }
-        .card-status-desconhecido::after {
-            background-color: #6c757d; /* Cinza */
-        }
-        .loading {
-            text-align: center;
-            font-size: 18px;
-            color: #007BFF;
-        }
     </style>
 </head>
 <body>
     <h1>Equipes Ativas</h1>
-    <div id="dashboard">
-        <div class="loading">Carregando dados...</div>
+
+    <!-- Seções para os status -->
+    <div class="status-section">
+        <div class="status-title status-em-base">🟢 Em Base</div>
+        <div id="em-base" class="cards-container"></div>
+    </div>
+
+    <div class="status-section">
+        <div class="status-title status-em-deslocamento">🟡 Em Deslocamento</div>
+        <div id="em-deslocamento" class="cards-container"></div>
+    </div>
+
+    <div class="status-section">
+        <div class="status-title status-em-acao">🔴 Em Ação</div>
+        <div id="em-acao" class="cards-container"></div>
+    </div>
+
+    <div class="status-section">
+        <div class="status-title status-outros">⚪ Outros</div>
+        <div id="outros" class="cards-container"></div>
     </div>
 
     <script>
 async function carregarDados() {
-  const url = "https://script.google.com/macros/s/AKfycbzAqJ0uEAshdKoTRaw3N2rcyic13yHISCCM7m0OajH2SMwN76N33-RuOxTG5hj7yfdd/exec";
-  try {
-    const response = await fetch(url);
-    if (!response.ok) throw new Error("Erro ao carregar dados");
-    const dados = await response.json();
-    console.log(dados); // Inspecione os dados no console
-    const dashboard = document.getElementById("dashboard");
-    dashboard.innerHTML = "";
+    const url = "https://script.google.com/macros/s/AKfycbzAqJ0uEAshdKoTRaw3N2rcyic13yHISCCM7m0OajH2SMwN76N33-RuOxTG5hj7yfdd/exec";
+    try {
+        const response = await fetch(url);
+        if (!response.ok) throw new Error("Erro ao carregar dados");
+        const dados = await response.json();
+        console.log(dados); // Inspecione os dados no console
 
-    dados.forEach(equipe => {
-      // Verifique se o campo "status" existe e é uma string válida
-      let status = equipe.status || "Status desconhecido";
-      if (typeof status !== "string") {
-        status = "Status desconhecido";
-      }
+        // Limpar as seções antes de adicionar novos elementos
+        document.getElementById("em-base").innerHTML = "";
+        document.getElementById("em-deslocamento").innerHTML = "";
+        document.getElementById("em-acao").innerHTML = "";
+        document.getElementById("outros").innerHTML = "";
 
-      // Normaliza o status para usar no nome da classe CSS
-      const statusClass = status.toLowerCase().replace(" ", "-");
+        dados.forEach(equipe => {
+            let status = equipe.status ? equipe.status.toLowerCase() : "outros";
+            const statusMap = {
+                "em base": "em-base",
+                "em deslocamento": "em-deslocamento",
+                "em ação": "em-acao"
+            };
+            const statusId = statusMap[status] || "outros";
 
-      const card = document.createElement("div");
-      card.className = `card card-${statusClass}`;
+            const card = document.createElement("div");
+            card.className = "card";
 
-      // Cria o conteúdo do cartão dinamicamente
-      let cardContent = `<h2>${equipe.equipe}</h2>`;
+            let cardContent = `<h2>${equipe.equipe}</h2>`;
+            for (const chave in equipe) {
+                if (chave !== "equipe" && chave !== "status") {
+                    cardContent += `<p><strong>${formatarChave(chave)}:</strong> ${equipe[chave]}</p>`;
+                }
+            }
+            cardContent += `<div class="status"><strong>Status:</strong> ${equipe.status || "Desconhecido"}</div>`;
 
-      // Itera sobre todas as chaves do objeto "equipe"
-      for (const chave in equipe) {
-        if (chave !== "equipe" && chave !== "status") { // Ignora "equipe" e "status"
-          cardContent += `<p><strong>${formatarChave(chave)}:</strong> ${equipe[chave]}</p>`;
-        }
-      }
+            card.innerHTML = cardContent;
+            document.getElementById(statusId).appendChild(card);
+        });
 
-      // Adiciona o status no final
-      cardContent += `<div class="status">Status: ${status}</div>`;
-
-      card.innerHTML = cardContent;
-      dashboard.appendChild(card);
-    });
-  } catch (error) {
-    const dashboard = document.getElementById("dashboard");
-    dashboard.innerHTML = `
-      <div class="card">
-        <h2>Erro ao carregar dados</h2>
-        <p><strong>Mensagem:</strong> ${error.message}</p>
-        <p><strong>Detalhes:</strong> Verifique o console para mais informações.</p>
-      </div>
-    `;
-    console.error("Erro detalhado:", error);
-  }
+    } catch (error) {
+        console.error("Erro detalhado:", error);
+    }
 }
 
 // Função para formatar as chaves (ex: "auxiliar_1" → "Auxiliar 1")
 function formatarChave(chave) {
-  return chave
-    .replace(/_/g, " ") // Substitui underscores por espaços
-    .replace(/\b\w/g, letra => letra.toUpperCase()); // Capitaliza a primeira letra de cada palavra
+    return chave.replace(/_/g, " ").replace(/\b\w/g, letra => letra.toUpperCase());
 }
 
 carregarDados();
