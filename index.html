@@ -87,65 +87,62 @@
     </div>
 
     <script>
-async function carregarDados() {
-  const url = "https://script.google.com/macros/s/AKfycbzAqJ0uEAshdKoTRaw3N2rcyic13yHISCCM7m0OajH2SMwN76N33-RuOxTG5hj7yfdd/exec";
-  try {
-    const response = await fetch(url);
-    if (!response.ok) throw new Error("Erro ao carregar dados");
-    const dados = await response.json();
-    console.log(dados); // Inspecione os dados no console
-    const dashboard = document.getElementById("dashboard");
-    dashboard.innerHTML = "";
+ async function carregarDados() {
+      const url = "https://script.google.com/macros/s/AKfycbzAqJ0uEAshdKoTRaw3N2rcyic13yHISCCM7m0OajH2SMwN76N33-RuOxTG5hj7yfdd/exec";
+      try {
+        const response = await fetch(url);
+        if (!response.ok) throw new Error("Erro ao carregar dados");
+        const dados = await response.json();
+        console.log(dados); // Inspecione os dados no console
+        const dashboard = document.getElementById("dashboard");
+        dashboard.innerHTML = "";
 
-    dados.forEach(equipe => {
-      // Verifique se o campo "status" existe e é uma string válida
-      let status = equipe.status || "Status desconhecido";
-      if (typeof status !== "string") {
-        status = "Status desconhecido";
-      }
+        // Define a ordem dos status
+        const ordemStatus = ["em base", "em deslocamento", "em ação"];
 
-      // Normaliza o status para usar no nome da classe CSS
-      const statusClass = status.toLowerCase().replace(" ", "-");
+        // Ordena os dados de acordo com a ordem predefinida
+        dados.sort((a, b) => {
+          const statusA = ordemStatus.indexOf(a.status.toLowerCase());
+          const statusB = ordemStatus.indexOf(b.status.toLowerCase());
+          return (statusA === -1 ? ordemStatus.length : statusA) - (statusB === -1 ? ordemStatus.length : statusB);
+        });
 
-      const card = document.createElement("div");
-      card.className = `card card-${statusClass}`;
+        dados.forEach(equipe => {
+          let status = equipe.status || "Status desconhecido";
+          if (typeof status !== "string") {
+            status = "Status desconhecido";
+          }
 
-      // Cria o conteúdo do cartão dinamicamente
-      let cardContent = `<h2>${equipe.equipe}</h2>`;
+          const statusClass = status.toLowerCase().replace(/\s/g, "-");
 
-      // Itera sobre todas as chaves do objeto "equipe"
-      for (const chave in equipe) {
-        if (chave !== "equipe" && chave !== "status") { // Ignora "equipe" e "status"
-          cardContent += `<p><strong>${formatarChave(chave)}:</strong> ${equipe[chave]}</p>`;
-        }
-      }
+          const card = document.createElement("div");
+          card.className = `card card-${statusClass}`;
 
-      // Adiciona o status no final
-      cardContent += `<div class="status">Status: ${status}</div>`;
+          let cardContent = `<h2>${equipe.equipe}</h2>`;
 
-      card.innerHTML = cardContent;
-      dashboard.appendChild(card);
-    });
-  } catch (error) {
-    const dashboard = document.getElementById("dashboard");
-    dashboard.innerHTML = `
+          for (const chave in equipe) {
+            if (chave !== "equipe" && chave !== "status") {
+              cardContent += `<p><strong>${formatarChave(chave)}:</strong> ${equipe[chave]}</p>`;
+            }
+          }
+
+          cardContent += `<div class="status">Status: ${status}</div>`;
+
+          card.innerHTML = cardContent;
+          dashboard.appendChild(card);
+        });
+      } catch (error) {
+        const dashboard = document.getElementById("dashboard");
+        dashboard.innerHTML = `
       <div class="card">
         <h2>Erro ao carregar dados</h2>
         <p><strong>Mensagem:</strong> ${error.message}</p>
         <p><strong>Detalhes:</strong> Verifique o console para mais informações.</p>
       </div>
     `;
-    console.error("Erro detalhado:", error);
-  }
-}
-
-// Função para formatar as chaves (ex: "auxiliar_1" → "Auxiliar 1")
-function formatarChave(chave) {
-  return chave
-    .replace(/_/g, " ") // Substitui underscores por espaços
-    .replace(/\b\w/g, letra => letra.toUpperCase()); // Capitaliza a primeira letra de cada palavra
-}
-
+        console.error("Erro detalhado:", error);
+      }
+    }
 carregarDados();
 setInterval(carregarDados, 10000); // Atualiza a cada 10 segundos
     </script>
